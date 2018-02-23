@@ -1,11 +1,12 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+const Table = require("cli-table");
 
 var connection = mysql.createConnection({
 	host : "localhost",
 	port  : 8889,
 	user: "root",
-	password: "",
+	password: "root",
 	database : "Bamazon"
 
 });
@@ -22,26 +23,42 @@ function beginBamazonManager(){
 	  {
 	    type: "list",
 	    message: "What do you want to do?",
-	    choices: ["View Products for Sale","View Low Inventory","Add to Inventory", "Add New Product", "Prefer to Exit"],
+	    choices: ["View Products for Sale",
+	    "View Low Inventory",
+	    "Add to Inventory",
+	    "Add New Product", 
+	    "Prefer to Exit"],
 	    name: "action"
 	  },
 
 	]).then(function(selection) {
 
 		if(selection.action === "View Products for Sale"){
-			connection.query("SELECT * from products", function(err, results, fields){
+			let query = "SELECT * from products";
+			connection.query( query, function(err, results, fields){
 				if(err) throw err;
 				if(results){	
-					console.log("ID\t" + "\tProduct\t" + "\tDepartment\t" + "\tStock\t" + "\tPrice" + "\n");
-					console.log("____________________________________________________________________");		
+
+					var table = new Table({
+						head: ['Product Id#', 'Product Name', 'Department Name', "In Stock", "$-Price"],
+						style: {
+							head: ['red'],
+							compact: false,
+							colAligns: ['center'],
+						}
+					});
+
+			
 				  	for (var i = 0; i < results.length; i++) {
-	   				 	console.log("#"+results[i].item_id + "\t" +
-	   				 	"\t" + results[i].product_name + "\t" +
-	   				 	"\t" + results[i].department_name + "\t" +
-	   				 	"\t" + results[i].stock_quantity + "\t" +
-	   				 	"\t$" + results[i].price);   				 
+				  		table.push([
+						results[i].item_id, 
+						results[i].product_name,
+						results[i].department_name ,
+	   				 	results[i].stock_quantity,
+	   				 	results[i].price]);   				 
 					}
-					console.log("____________________________________________");
+
+					console.log(table.toString());
 				} 
 
 				beginBamazonManager();
@@ -51,15 +68,27 @@ function beginBamazonManager(){
 			connection.query("SELECT * FROM products WHERE stock_quantity <= 5", function(err, results, fields){
 				if(err) throw err;
 				if(results){	
-					console.log("___________________________________________");		
+
+					var table = new Table({
+						head: ['Product Name', 'Department Name', "In Stock"],
+						style: {
+							head: ['red'],
+							compact: false,
+							colAligns: ['center'],
+						}
+					});
+
+			
 				  	for (var i = 0; i < results.length; i++) {
-	   				 	console.log("#"+results[i].item_id + 
-	   				 	"\tProduct: " + results[i].product_name + 
-	   				 	"\tDepartment: " + results[i].department_name +
-	   				 	"\tIn Stock: " + results[i].stock_quantity +
-	   				 	"\tPrice: $ " + results[i].price);   				 
+				  		table.push([
+						results[i].product_name,
+						results[i].department_name ,
+	   				 	results[i].stock_quantity
+						]);   				 
 					}
-					console.log("___________________________________________");
+
+					console.log(table.toString());
+
 				}
 
 				beginBamazonManager(); 
@@ -79,10 +108,13 @@ function beginBamazonManager(){
 		            message: "How many do you wish to add to Inventory?",
 		        }
 		    ]).then(function(response) {
-                connection.query("UPDATE products SET stock_quantity =" +
-                	"stock_quantity + ? WHERE item_id = ?", 
+
+		    	var query = "UPDATE products SET stock_quantity =" +
+                	"stock_quantity + ? WHERE item_id = ?";
+                connection.query(query, 
                 	[response.quantity, response.itemId], function(err, results) { 
                 	if(err) throw err;
+
 					if(results){	
 						console.log(results.affectedRows + " item updated successfully");
 						console.log("_______________________________________");	
@@ -96,11 +128,6 @@ function beginBamazonManager(){
 
 		}else if(selection.action === "Add New Product"){
 			inquirer.prompt([
-		        {
-		            type: "input",
-		            name: "itemId",
-		            message: "What is the Id of the product?"
-		        },
 		        {
 		            type: "input",
 		            name: "product",
@@ -122,7 +149,7 @@ function beginBamazonManager(){
 		            message: "How many product items in stock?"
 		        }
 		    ]).then(function(response) {
-                connection.query("INSERT INTO products (item_id, product_name, department_name, price, stock_quantity) VALUES (?,?,?,?,?)", [response.itemId,response.product,response.department,response.price,response.quantity], function(err, results) {                    
+                connection.query("INSERT INTO products (product_name, department_name, price, stock_quantity) VALUES (?,?,?,?)", [response.product,response.department,response.price,response.quantity], function(err, results) {                    
                 	if(err) throw err;
 					if(results){	
 						console.log(results.affectedRows + " item added successfully");
