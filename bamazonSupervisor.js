@@ -1,5 +1,6 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+var Table = require("cli-table");
 
 var connection = mysql.createConnection({
 	host : "localhost",
@@ -31,32 +32,45 @@ function beginBamazonSupervisor(){
 
 	]).then(function(selection) {
 		  if(selection.action === "View Product Sales by Department"){
-		  	connection.query("SELECT department_id, department_name, over_head_costs, total_sales, (total_sales - over_head_costs) AS total_profit FROM departments", function(err, results) { 
+
+		  	let query = "SELECT department_id, department_name, over_head_costs, total_sales, (total_sales - over_head_costs) AS total_profit FROM departments";
+
+		  	console.log(query);
+
+		  	connection.query(query, function(err, results) { 
                 	if(err) 
                 		throw err;
 
 					if(results){
-						console.log("_______________________________________________________");			
-					  	for (var i = 0; i < results.length; i++) {
-		   				 	console.log("#"+results[i].department_id + "\t" +
-		   				 	"Name : " + results[i].department_name+ "\t" +
-		   				 	" | Over Head Costs : " + results[i].over_head_costs + "\t" +
-		   				 	" | Total Sales : " + results[i].total_sales + "\t" +
-		   				 	" | Total Profit : " + results[i].total_profit);    				 
-					}
 
-					console.log("_______________________________________________________");
+						var table = new Table({
+							head: ['Deparment Id#', 'Department Name', 'Over Head Costs', 'Total Sales', 'Total Profit'],
+							style: {
+								head: ['red'],
+								compact: false,
+								colAligns: ['center']
+							}
+						});
+	
+					  	for (var i = 0; i < results.length; i++) {
+					  		table.push(
+							    [results[i].department_id, results[i].department_name, results[i].over_head_costs, results[i].total_sales, results[i].total_profit]
+							);  				 
+						}
+
+					console.log(table.toString());
+
 				} 
 
 				beginBamazonSupervisor();      
             });	
-            		  	
+
 		  }else if(selection.action === "Create New Department"){
 
 		  	inquirer.prompt([
 		        {
 		            type: "input",
-		            name: "itemId",
+		            name: "department_name",
 		            message: "What is the Department name?"
 		        }
 		    ]).then(function(response) {
@@ -64,9 +78,9 @@ function beginBamazonSupervisor(){
                 	if(err) throw err;
 					if(results){	
 						console.log(results.affectedRows + " Department added successfully");
-						console.log("_________________________________________");	
 					} 
 				beginBamazonSupervisor(); 
+
             	});
 		  	});
 

@@ -37,9 +37,9 @@ VALUES ("10", "Soda", "Grocery",0.20,20);
 
 CREATE TABLE departments (
   department_id INT NOT NULL AUTO_INCREMENT,
-  department_name VARCHAR(100) NULL,
-  over_head_costs INT NULL,
-  total_sales INT NULL,
+  department_name VARCHAR(100) NOT NULL,
+  over_head_costs INT NULL DEFAULT 0,
+  total_sales INT NULL DEFAULT 0,
   PRIMARY KEY (department_id)
 );
 
