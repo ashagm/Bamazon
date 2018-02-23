@@ -5,7 +5,7 @@ CREATE DATABASE Bamazon;
 USE Bamazon;
 
 CREATE TABLE products (
-  item_id INT NOT NULL,
+  item_id INT NOT NULL AUTO_INCREMENT,
   product_name VARCHAR(100) NULL,
   department_name VARCHAR(100) NULL,
   price DECIMAL(10,3) NULL,
@@ -34,3 +34,17 @@ INSERT INTO products (item_id, product_name, department_name, price, stock_quant
 VALUES ("9", "Balm", "Cosmetics",0.30,2);
 INSERT INTO products (item_id, product_name, department_name, price, stock_quantity)
 VALUES ("10", "Soda", "Grocery",0.20,20);
+
+CREATE TABLE departments (
+  department_id INT NOT NULL AUTO_INCREMENT,
+  department_name VARCHAR(100) NULL,
+  over_head_costs INT NULL,
+  total_sales INT NULL,
+  PRIMARY KEY (department_id)
+);
+
+
+INSERT INTO departments (department_id, department_name, over_head_costs, total_sales)
+VALUES ("01", "Electronics", 10000,20000);
+INSERT INTO departments (department_id, department_name, over_head_costs, total_sales)
+VALUES ("02", "Clothing", 60000, 100000);
